@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torrent Client</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <style>
+        .torrent-info {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        .file-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .hidden {
+            display: none;
+        }
+        .download-progress {
+            margin-top: 1rem;
+        }
+        progress {
+            width: 100%;
+            height: 20px;
+        }
+        .active-torrent {
+            background: #e6f7ff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .auth-container {
+            margin-bottom: 2rem;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .torrent-card {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .oauth-providers {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .oauth-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+        .google-btn {
+            background: #4285F4;
+            color: white;
+        }
+        .apple-btn {
+            background: #000000;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>Torrent Client</h1>
+        
+        <div id="auth-container" class="auth-container">
+            <div id="user-info" class="user-info hidden">
+                <span id="user-email"></span>
+                <button id="logout-btn" class="secondary">Logout</button>
+            </div>
+            <div id="login-form">
+                <input type="email" id="email" placeholder="Email">
+                <input type="password" id="password" placeholder="Password">
+                <button id="login-btn">Login</button>
+                <button id="signup-btn" class="secondary">Sign Up</button>
+                
+                <div class="oauth-providers">
+                    <button id="google-login" class="oauth-btn google-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M15.545 6.558a9.42 9.42 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.689 7.689 0 0 1 5.352 2.082l-2.284 2.284A4.347 4.347 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.792 4.792 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.702 3.702 0 0 0 1.599-2.431H8v-3.08h7.545z"/>
+                        </svg>
+                        Continue with Google
+                    </button>
+                    <button id="apple-login" class="oauth-btn apple-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516.024.034 1.52.087 2.475-1.258.955-1.345.762-2.391.728-2.43zm3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422.212-2.189 1.675-2.789 1.698-2.854.023-.065-.597-.79-1.254-1.157a3.692 3.692 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56.244.729.625 1.924 1.273 2.796.576.984 1.34 1.667 1.659 1.899.319.232 1.219.386 1.843.067.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758.347-.79.505-1.217.473-1.282z"/>
+                        </svg>
+                        Continue with Apple
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="app-content" class="hidden">
+            <div class="grid">
+                <div>
+                    <h2>Upload Torrent File</h2>
+                    <input type="file" id="torrent-file" accept=".torrent">
+                    <div id="torrent-info" class="torrent-info hidden">
+                        <h3>Torrent Information</h3>
+                        <p><strong>Name:</strong> <span id="torrent-name"></span></p>
+                        <p><strong>Size:</strong> <span id="torrent-size"></span></p>
+                        <p><strong>Hash:</strong> <span id="torrent-hash"></span></p>
+                        <p><strong>File Count:</strong> <span id="file-count"></span></p>
+                        
+                        <h4>Files:</h4>
+                        <div id="file-list" class="file-list"></div>
+                        
+                        <div class="download-actions">
+                            <button id="start-download" class="secondary">Start Download</button>
+                            <button id="save-metadata" class="secondary">Save Metadata</button>
+                        </div>
+                    </div>
+
+                    <div id="active-downloads" class="download-progress"></div>
+                </div>
+                
+                <div>
+                    <h2>Your Torrents</h2>
+                    <div id="saved-torrents"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bencode@2.0.1/dist/bencode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
