@@ -453,3 +453,41 @@ function formatSize(bytes) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
+// Listen for auth state changes
+supabase.auth.onAuthStateChange((event, session) => {
+  console.log('Auth state changed:', event, session);
+  if (event === 'SIGNED_IN') {
+    currentUser = session.user;
+    showAppContent();
+    loadSavedTorrents();
+  } else if (event === 'SIGNED_OUT') {
+    currentUser = null;
+    hideAppContent();
+  }
+});
+
+// Add error logging to all auth functions
+async function handleGoogleLogin() {
+  try {
+    console.log('Initiating Google login...');
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent'
+        }
+      }
+    });
+    
+    if (error) {
+      console.error('Google login error:', error);
+      throw error;
+    }
+    console.log('Google login initiated successfully');
+  } catch (error) {
+    console.error('Google login failed:', error);
+    alert('Google login failed. Check console for details.');
+  }
+}
